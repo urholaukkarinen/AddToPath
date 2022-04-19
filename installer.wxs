@@ -1,0 +1,55 @@
+﻿<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+
+    <Product Name='AddToPath' Id='*'
+             UpgradeCode='358c7069-7def-49d6-9fd4-cf966dd15eb0' Language='1033' Version='0.1.0' Manufacturer='Me'>
+
+        <Package Id='*' Keywords='Installer' Description="Add directories to PATH via context menu"
+                 Manufacturer='Me' InstallerVersion='400' Languages='1033'
+                 Compressed='yes' SummaryCodepage='1252' InstallScope='perMachine'
+                 Platform='x64'/>
+
+        <Media Id='1' Cabinet='AddToPath.cab' EmbedCab='yes'/>
+
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                <Directory Id='INSTALLDIR' Name='AddToPath'>
+                    <Component Id='Libraries' Guid='950328cd-3c67-446f-a259-53fd8e1d5b51'>
+                        <File Id='AddToPath.dll' Name='AddToPath.dll'
+                              Source='AddToPath\bin\Release\AddToPath.dll'
+                              DiskId='1' />
+                        <File Id='SharpShell.dll' Name='SharpShell.dll'
+                              Source='AddToPath\bin\Release\SharpShell.dll'
+                              DiskId='1' />
+                        <File Id="SrmExe" Source="extras\srm.exe"/>
+                    </Component>
+                </Directory>
+            </Directory>
+        </Directory>
+
+        <CustomAction Id="InstallShell" FileKey="SrmExe"
+                      ExeCommand='install "[INSTALLDIR]\AddToPath.dll" -codebase'
+                      Execute="deferred" Return="check" Impersonate="no" />
+        <CustomAction Id="UninstallShell" FileKey="SrmExe"
+                      ExeCommand='uninstall "[INSTALLDIR]\AddToPath.dll"'
+                      Execute="deferred" Return="check" Impersonate="no" />
+
+        <InstallExecuteSequence>
+            <Custom Action="InstallShell"
+                    After="InstallFiles">NOT Installed
+            </Custom>
+            <Custom Action="UninstallShell"
+                    Before="RemoveFiles">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")
+            </Custom>
+        </InstallExecuteSequence>
+
+
+        <Feature Id='AddToPathFeature' Title='AddToPath' Description='AddToPath'
+                 Level='1' AllowAdvertise='no'>
+            <ComponentRef Id="Libraries" />
+        </Feature>
+
+        <Property Id="MSIUSEREALADMINDETECTION" Value="1" />
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    </Product>
+</Wix>
